@@ -151,6 +151,25 @@ local function populateTypes()
 end
 local SUPPORTED_TYPES, TYPE_HELPERS = populateTypes()
 
+-- Ensure generic types (like "string") don't mask more specific ones (like "phase")
+local function buildTypeCheckOrder(supportedTypes)
+  local ordered = {}
+  local hasString = false
+  for _, typeName in ipairs(supportedTypes) do
+    if typeName == "string" then
+      hasString = true
+    else
+      table.insert(ordered, typeName)
+    end
+  end
+  if hasString then
+    table.insert(ordered, "string")
+  end
+  return ordered
+end
+
+local TYPE_CHECK_ORDER = buildTypeCheckOrder(SUPPORTED_TYPES)
+
 --=============================================================================
 
 local function reloadProperties(object, objType, pluginKeyID)
@@ -166,7 +185,7 @@ local function reloadProperties(object, objType, pluginKeyID)
   if object.properties(PLUGIN_KEY) then
     for key, value in pairs(object.properties(PLUGIN_KEY)) do
       local typeFound = nil
-      for _, typeName in ipairs(SUPPORTED_TYPES) do
+      for _, typeName in ipairs(TYPE_CHECK_ORDER) do
         local typeHelper = TYPE_HELPERS[typeName]
         if typeHelper and typeHelper.isType and typeHelper.isType(value) then
           debugPrint("Found type for key:", key, "->", typeName)

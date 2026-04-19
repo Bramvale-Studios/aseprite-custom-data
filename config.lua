@@ -10,7 +10,7 @@ config.keys = {
     default_properties = {
       Tag = {
         { key = "phase", type = "phase", value = "Solo" },
-        { key = "yield", type = "bool", value = false }
+        { key = "gateExit", type = "bool", value = false }
       }
     }
   }
